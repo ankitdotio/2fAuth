@@ -6,8 +6,9 @@ import type {
 } from "express";
 import { config } from "../config/env.js";
 import { ApplicationException } from "../helpers/errorhelper.js";
+import { ZodError } from "zod";
 
-type TGlobalError = Error | ApplicationException;
+type TGlobalError = Error | ApplicationException | ZodError;
 
 const globalErrorMiddleware: ErrorRequestHandler = (
   err: TGlobalError,
@@ -19,6 +20,12 @@ const globalErrorMiddleware: ErrorRequestHandler = (
   let errorMessage = err.message;
   if (err instanceof ApplicationException) {
     statusCode = err.statusCode;
+  } else if (err instanceof ZodError) {
+    if (err.issues.length > 0) {
+      const { path, message } = err.issues[0];
+      statusCode = 422;
+      errorMessage = `${path.length > 0 ? path + "->" : ""}${message}`;
+    }
   }
   const response = {
     success: false,

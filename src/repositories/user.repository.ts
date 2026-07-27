@@ -4,8 +4,8 @@ import type { IUserSchema } from "../types/user.type.js";
 import type { QueryFilter, UpdateQuery, UpdateWriteOpResult } from "mongoose";
 
 export default class UserRepository implements IUserRepository {
-  findOne = async (filter: QueryFilter<IUserSchema>, select: string | "") => {
-    return await userModel.findOne(filter).select(select);
+  findOne = async (filter: QueryFilter<IUserSchema>, select?: string) => {
+    return await userModel.findOne(filter).select(select ?? "");
   };
   create = async (payload: IUserSchema) => {
     return await userModel.create(payload);
