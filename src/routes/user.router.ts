@@ -16,4 +16,7 @@ const userController = new UserController(userService);
 
 userRouter.route("/register").post(userController.register);
 
+//LOGIN ROUTE
+userRouter.route("/login").post(userController.login);
+
 export default userRouter;

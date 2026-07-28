@@ -5,6 +5,7 @@ const schema = z.object({
   PORT: z.coerce.number().default(3000),
   SERVER_REQUEST_TIMEOUT: z.coerce.number(),
   DB_STRING: z.string(),
+  ACCESS_TOKEN_SECRET: z.string(),
 });
 
 export const config = schema.parse(process.env);

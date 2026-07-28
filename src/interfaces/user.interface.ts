@@ -3,7 +3,10 @@ import type { IUserSchema } from "../types/user.type.js";
 import type { QueryFilter, UpdateQuery, UpdateWriteOpResult } from "mongoose";
 import type { TServiceSuccess } from "../types/service.type.js";
 import type z from "zod";
-import type { registerUserValidator } from "../validator/user.validator.js";
+import type {
+  loginUserValidator,
+  registerUserValidator,
+} from "../validator/user.validator.js";
 
 export interface IUserRepository {
   findOne: (
@@ -19,16 +22,24 @@ export interface IUserRepository {
 
 export interface IUserController {
   register: RequestHandler;
+  login: RequestHandler;
 }
 
 export interface IUserService {
   register: (
     payload: IUserRequestData["register"]["body"],
   ) => Promise<TServiceSuccess<{ userId: string }>>;
+
+  login: (
+    payload: IUserRequestData["login"]["body"],
+  ) => Promise<TServiceSuccess<{ userId: string; accessToken: string }>>;
 }
 
 export interface IUserRequestData {
   register: {
     body: z.infer<typeof registerUserValidator>;
+  };
+  login: {
+    body: z.infer<typeof loginUserValidator>;
   };
 }

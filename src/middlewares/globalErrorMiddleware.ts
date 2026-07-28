@@ -24,7 +24,7 @@ const globalErrorMiddleware: ErrorRequestHandler = (
     if (err.issues.length > 0) {
       const { path, message } = err.issues[0];
       statusCode = 422;
-      errorMessage = `${path.length > 0 ? path + "->" : ""}${message}`;
+      errorMessage = `${path.length > 0 ? path + " -> " : ""}${message}`;
     }
   }
   const response = {

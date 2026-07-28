@@ -15,6 +15,7 @@ const startApplication = async () => {
     /**
      * STARTING UP THE SERVER
      */
+
     const server = app.listen(config.PORT ?? 3000);
     server.timeout = config.SERVER_REQUEST_TIMEOUT ?? 30 * 1000;
     console.info("SERVER IS UP AND RUNNING");
