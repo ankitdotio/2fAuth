@@ -104,7 +104,7 @@ export default class UserService implements IUserService {
       { _id: user._id },
       {
         $set: {
-          twoFactorAuth: secret,
+          "twoFactorAuth.secret": secret,
           "twoFactorAuth.recoveryCodes": recoveryCodes.hashed.map((code) => {
             return { code, used: false };
           }),
@@ -115,7 +115,7 @@ export default class UserService implements IUserService {
       throw new ApplicationException(400, "ACTIVATION FAILED");
     }
 
-    return serviceSuccess("ACTVATION COMPLETED", {
+    return serviceSuccess("ACTVATION LOADED", {
       qrDataUrl,
       recoveryCodes: recoveryCodes.plainText,
     });
