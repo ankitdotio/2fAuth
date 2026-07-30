@@ -12,6 +12,7 @@ import {
   registerUserValidator,
 } from "../validator/user.validator.js";
 import { getCookieOptions } from "../helpers/cookie.helper.js";
+import { IauthenticatedRequest } from "../types/auth.type.js";
 
 export default class UserController implements IUserController {
   constructor(private UserService: IUserService) {}
@@ -48,6 +49,13 @@ export default class UserController implements IUserController {
     });
 
     res.cookie("accessToken", response.data.accessToken, cookieOptions);
+    res.status(200).json(response);
+  };
+  activate2FA: RequestHandler = async (req, res, next) => {
+    const { user } = req as IauthenticatedRequest;
+
+    const response = await this.UserService.activate2FA(user);
+
     res.status(200).json(response);
   };
 }

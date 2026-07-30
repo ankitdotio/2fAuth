@@ -14,6 +14,6 @@ export default class UserRepository implements IUserRepository {
     filter: QueryFilter<IUserSchema>,
     update: UpdateQuery<IUserSchema>,
   ) => {
-    return await userModel.updateOne(FileSystemEntry, update);
+    return await userModel.updateOne(filter, update);
   };
 }

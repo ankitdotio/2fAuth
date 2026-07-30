@@ -8,6 +8,17 @@ import type {
   registerUserValidator,
 } from "../validator/user.validator.js";
 
+export interface IUserRequestData {
+  register: {
+    body: z.infer<typeof registerUserValidator>;
+  };
+  login: {
+    body: z.infer<typeof loginUserValidator>;
+  };
+  request2FA: {
+    user: IUserSchema;
+  };
+}
 export interface IUserRepository {
   findOne: (
     filter: QueryFilter<IUserSchema>,
@@ -23,6 +34,7 @@ export interface IUserRepository {
 export interface IUserController {
   register: RequestHandler;
   login: RequestHandler;
+  activate2FA: RequestHandler;
 }
 
 export interface IUserService {
@@ -33,13 +45,11 @@ export interface IUserService {
   login: (
     payload: IUserRequestData["login"]["body"],
   ) => Promise<TServiceSuccess<{ userId: string; accessToken: string }>>;
-}
 
-export interface IUserRequestData {
-  register: {
-    body: z.infer<typeof registerUserValidator>;
-  };
-  login: {
-    body: z.infer<typeof loginUserValidator>;
-  };
+  activate2FA: (user: IUserRequestData["request2FA"]["user"]) => Promise<
+    TServiceSuccess<{
+      qrDataUrl: string;
+      recoveryCodes: string[];
+    }>
+  >;
 }

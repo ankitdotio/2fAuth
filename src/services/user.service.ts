@@ -12,6 +12,8 @@ import { TJwtPayload } from "../types/jwt.type.js";
 import { signJWT } from "../helpers/jwt.helper.js";
 import { config } from "../config/env.js";
 import { generateMinutesSeconds } from "../helpers/date-time.helper.js";
+import { generateRecoveryCodes, generateTOTP } from "../helpers/2fa.helper.js";
+import { createQRCodeDataUrl } from "../helpers/qr.helper.js";
 
 export default class UserService implements IUserService {
   constructor(private userRepository: IUserRepository) {}
@@ -78,6 +80,44 @@ export default class UserService implements IUserService {
     return serviceSuccess("LOGGED IN", {
       userId: String(user._id),
       accessToken,
+    });
+  };
+
+  activate2FA = async (user: IUserRequestData["request2FA"]["user"]) => {
+    const is2FAactivated = user.twoFactorAuth.activated;
+    if (is2FAactivated) {
+      throw new ApplicationException(400, "ALREADY ACTIVATED");
+    }
+
+    //TOTP
+    const totp = generateTOTP(user.email);
+    const otpAuth = totp.toString();
+
+    const qrDataUrl = await createQRCodeDataUrl(otpAuth);
+
+    //Properties
+    const secret = totp.secret.base32;
+    const recoveryCodes = await generateRecoveryCodes(10);
+
+    //Update User
+    const updatedUser = await this.userRepository.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          twoFactorAuth: secret,
+          "twoFactorAuth.recoveryCodes": recoveryCodes.hashed.map((code) => {
+            return { code, used: false };
+          }),
+        },
+      },
+    );
+    if (updatedUser.modifiedCount === 0) {
+      throw new ApplicationException(400, "ACTIVATION FAILED");
+    }
+
+    return serviceSuccess("ACTVATION COMPLETED", {
+      qrDataUrl,
+      recoveryCodes: recoveryCodes.plainText,
     });
   };
 }

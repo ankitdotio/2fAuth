@@ -3,14 +3,20 @@ import express from "express";
 import globalErrorMiddleware from "./middlewares/globalErrorMiddleware.js";
 import { ApplicationException } from "./helpers/errorhelper.js";
 import userRouter from "./routes/user.router.js";
+import cookieParser from "cookie-parser";
+import helmet from "helmet";
 
 export const app: Application = express();
 
 app.use(express.json());
 
+app.use(helmet());
+app.use(cookieParser());
+
 /**
  * ROUTER
  */
+
 app.use("/v1/user", userRouter);
 
 /**
