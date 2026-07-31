@@ -8,7 +8,7 @@ import { userModel } from "../models/users.model.js";
 import { ApplicationException } from "../helpers/errorhelper.js";
 
 type TAuthMiddlewareParams = {
-  stage: ("password" | "auth-code")[];
+  stage: ("password" | "2fa")[];
   repositories: {
     userRepository: IUserRepository;
   };
@@ -34,7 +34,7 @@ const authMiddleware =
           {
             _id: jwtPayload.userId,
           },
-          "+twoFactorAuth",
+          "+twoFactorAuth.secret",
         );
         if (!user) {
           return next(new ApplicationException(401, "UNAUTHORIZED"));

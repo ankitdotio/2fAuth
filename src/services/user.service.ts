@@ -11,7 +11,10 @@ import { TServiceSuccess } from "../types/service.type.js";
 import { TJwtPayload } from "../types/jwt.type.js";
 import { signJWT } from "../helpers/jwt.helper.js";
 import { config } from "../config/env.js";
-import { generateMinutesSeconds } from "../helpers/date-time.helper.js";
+import {
+  generateDaySeconds,
+  generateMinutesSeconds,
+} from "../helpers/date-time.helper.js";
 import { generateRecoveryCodes, generateTOTP } from "../helpers/2fa.helper.js";
 import { createQRCodeDataUrl } from "../helpers/qr.helper.js";
 
@@ -118,6 +121,53 @@ export default class UserService implements IUserService {
     return serviceSuccess("ACTVATION LOADED", {
       qrDataUrl,
       recoveryCodes: recoveryCodes.plainText,
+    });
+  };
+
+  verify2FA = async (
+    user: IUserRequestData["verify2FA"]["user"],
+    payload: IUserRequestData["verify2FA"]["body"],
+  ) => {
+    const totp = generateTOTP(user.email, user.twoFactorAuth.secret!);
+    const delta = totp.validate({
+      token: payload.totp,
+      window: 1,
+    });
+
+    if (delta !== 0) {
+      throw new ApplicationException(400, "VERIFICATION FAILED");
+    }
+
+    const is2FAActivated = user.twoFactorAuth.activated;
+
+    if (!is2FAActivated) {
+      const updatedUser = await this.userRepository.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            "twoFactorAuth.activated": true,
+          },
+        },
+      );
+      if (updatedUser.modifiedCount === 0) {
+        throw new ApplicationException(400, "VERIFICATION FAILED");
+      }
+    }
+
+    //token generation
+    const tokenPayload: TJwtPayload = {
+      userId: String(user._id),
+      stage: "2fa",
+    };
+
+    const accessToken = signJWT(
+      tokenPayload,
+      config.ACCESS_TOKEN_SECRET,
+      generateDaySeconds(1),
+    );
+    return serviceSuccess("LOGGED IN", {
+      userId: String(user._id),
+      accessToken,
     });
   };
 }

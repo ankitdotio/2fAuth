@@ -10,3 +10,7 @@ export const loginUserValidator = z.object({
   email: z.email().nonempty(),
   password: z.string().min(5).max(30),
 });
+
+export const verify2FAValidator = z.object({
+  totp: z.string().length(6),
+});

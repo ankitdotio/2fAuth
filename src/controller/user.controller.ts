@@ -10,6 +10,7 @@ import type {
 import {
   loginUserValidator,
   registerUserValidator,
+  verify2FAValidator,
 } from "../validator/user.validator.js";
 import { getCookieOptions } from "../helpers/cookie.helper.js";
 import { IauthenticatedRequest } from "../types/auth.type.js";
@@ -56,6 +57,28 @@ export default class UserController implements IUserController {
 
     const response = await this.UserService.activate2FA(user);
 
+    res.status(200).json(response);
+  };
+
+  verify2FA: RequestHandler = async (req, res, next) => {
+    const { user } = req as IauthenticatedRequest;
+    const body = req.body as IUserRequestData["login"]["body"];
+
+    const { success, data, error } = verify2FAValidator.safeParse(body);
+
+    if (!success) {
+      next(error);
+      return;
+    }
+
+    const response = await this.UserService.verify2FA(user, data);
+    const cookieOptions = getCookieOptions({
+      purpose: "auth",
+      type: "day",
+      value: 1,
+    });
+
+    res.cookie("accessToken", response.data.accessToken, cookieOptions);
     res.status(200).json(response);
   };
 }
