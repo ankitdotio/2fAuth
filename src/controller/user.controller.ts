@@ -86,4 +86,20 @@ export default class UserController implements IUserController {
     const response = this.UserService.me(user);
     res.status(200).json(response);
   };
+
+  logout: RequestHandler = (req, res) => {
+    const { user, cookies } = req as IauthenticatedRequest;
+
+    const response = this.UserService.logout(user);
+
+    //COOKIE
+    const cookieOptions = getCookieOptions({
+      purpose: "logout",
+    });
+
+    for (const cookie of Object.keys(cookies)) {
+      res.clearCookie(cookie, cookieOptions);
+    }
+    res.status(200).json(response);
+  };
 }

@@ -26,6 +26,9 @@ export interface IUserRequestData {
   me: {
     user: IUserSchema;
   };
+  logout: {
+    user: IUserSchema;
+  };
 }
 export interface IUserRepository {
   findOne: (
@@ -45,6 +48,7 @@ export interface IUserController {
   activate2FA: RequestHandler;
   verify2FA: RequestHandler;
   me: RequestHandler;
+  logout: RequestHandler;
 }
 
 export interface IUserService {
@@ -80,5 +84,9 @@ export interface IUserService {
       activated: boolean;
     };
     createdAt?: Date;
+  }>;
+
+  logout: (user: IUserRequestData["logout"]["user"]) => TServiceSuccess<{
+    userId: string;
   }>;
 }
