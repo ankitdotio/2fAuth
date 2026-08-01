@@ -1,0 +1,12 @@
+"recoveryCodes": [
+            "abMPRCx7zt",
+            "lRqAOtUhQ2",
+            "rsYXVSKHEw",
+            "Xx1wKEeQoR",
+            "EYGyFbWvkI",
+            "GmmKwP9X3Z",
+            "DWYAtTEOjY",
+            "1gmtqzi4nC",
+            "0h13r94N39",
+            "2LqvWAKq1e"
+        ]

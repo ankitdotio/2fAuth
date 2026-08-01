@@ -111,11 +111,6 @@ export default class UserController implements IUserController {
     res.cookie("accessToken", response.data.accessToken, cookieOptions);
     res.status(200).json(response);
   };
-  me: RequestHandler = (req, res, next) => {
-    const { user } = req as IauthenticatedRequest;
-    const response = this.UserService.me(user);
-    res.status(200).json(response);
-  };
 
   logout: RequestHandler = (req, res) => {
     const { user, cookies } = req as IauthenticatedRequest;
@@ -130,6 +125,21 @@ export default class UserController implements IUserController {
     for (const cookie of Object.keys(cookies)) {
       res.clearCookie(cookie, cookieOptions);
     }
+    res.status(200).json(response);
+  };
+
+  reset2FA: RequestHandler = async (req, res, next) => {
+    const { user } = req as IauthenticatedRequest;
+    const response = await this.UserService.reset2FA(user);
+
+    //set cookie
+    const cookieOptions = getCookieOptions({
+      purpose: "auth",
+      type: "minutes",
+      value: 5,
+    });
+
+    res.cookie("accessToken", response.data.accessToken, cookieOptions);
     res.status(200).json(response);
   };
 }

@@ -240,4 +240,43 @@ export default class UserService implements IUserService {
       accessToken,
     });
   };
+
+  reset2FA = async (user: IUserRequestData["reset2FA"]["user"]) => {
+    const is2FAActivated = user.twoFactorAuth.activated;
+
+    if (!is2FAActivated) {
+      throw new ApplicationException(400, "cannot reset 2fa");
+    }
+
+    const updatedUser = await this.userRepository.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          "twoFactorAuth.activated": false,
+          "twoFactorAuth.secret": null,
+          "twoFactorAuth.recoveryCodes": [],
+        },
+      },
+    );
+    if (updatedUser.modifiedCount === 0) {
+      throw new ApplicationException(400, "CANNOT RESET");
+    }
+
+    //TOKEN PAYLOAD
+
+    const tokenPayload: TJwtPayload = {
+      userId: String(user._id),
+      stage: "password",
+    };
+
+    const accessToken = signJWT(
+      tokenPayload,
+      config.ACCESS_TOKEN_SECRET,
+      generateMinutesSeconds(5),
+    );
+    return serviceSuccess("2FA RESET SUCCESS", {
+      userId: String(user._id),
+      accessToken,
+    });
+  };
 }
