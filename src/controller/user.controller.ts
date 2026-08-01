@@ -81,4 +81,9 @@ export default class UserController implements IUserController {
     res.cookie("accessToken", response.data.accessToken, cookieOptions);
     res.status(200).json(response);
   };
+  me: RequestHandler = (req, res, next) => {
+    const { user } = req as IauthenticatedRequest;
+    const response = this.UserService.me(user);
+    res.status(200).json(response);
+  };
 }

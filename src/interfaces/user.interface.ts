@@ -23,6 +23,9 @@ export interface IUserRequestData {
     user: IUserSchema;
     body: z.infer<typeof verify2FAValidator>;
   };
+  me: {
+    user: IUserSchema;
+  };
 }
 export interface IUserRepository {
   findOne: (
@@ -41,6 +44,7 @@ export interface IUserController {
   login: RequestHandler;
   activate2FA: RequestHandler;
   verify2FA: RequestHandler;
+  me: RequestHandler;
 }
 
 export interface IUserService {
@@ -68,4 +72,13 @@ export interface IUserService {
       accessToken: string;
     }>
   >;
+  me: (user: IUserRequestData["me"]["user"]) => TServiceSuccess<{
+    userId: string;
+    name: string;
+    email: string;
+    twoFactorAuth: {
+      activated: boolean;
+    };
+    createdAt?: Date;
+  }>;
 }
