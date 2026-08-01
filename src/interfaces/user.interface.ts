@@ -77,7 +77,6 @@ export interface IUserService {
   activate2FA: (user: IUserRequestData["request2FA"]["user"]) => Promise<
     TServiceSuccess<{
       qrDataUrl: string;
-      recoveryCodes: string[];
     }>
   >;
 
@@ -98,6 +97,8 @@ export interface IUserService {
     TServiceSuccess<{
       userId: string;
       accessToken: string;
+
+      recoveryCodes: string[];
     }>
   >;
   me: (user: IUserRequestData["me"]["user"]) => TServiceSuccess<{
