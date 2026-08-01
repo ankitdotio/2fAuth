@@ -5,6 +5,7 @@ import type { TServiceSuccess } from "../types/service.type.js";
 import type z from "zod";
 import type {
   loginUserValidator,
+  recover2FAValidator,
   registerUserValidator,
   verify2FAValidator,
 } from "../validator/user.validator.js";
@@ -15,6 +16,13 @@ export interface IUserRequestData {
   };
   login: {
     body: z.infer<typeof loginUserValidator>;
+  };
+  activate2FA: {
+    user: IUserSchema;
+  };
+  recover2FA: {
+    user: IUserSchema;
+    body: z.infer<typeof recover2FAValidator>;
   };
   request2FA: {
     user: IUserSchema;
@@ -46,6 +54,7 @@ export interface IUserController {
   register: RequestHandler;
   login: RequestHandler;
   activate2FA: RequestHandler;
+  recover: RequestHandler;
   verify2FA: RequestHandler;
   me: RequestHandler;
   logout: RequestHandler;
@@ -64,6 +73,16 @@ export interface IUserService {
     TServiceSuccess<{
       qrDataUrl: string;
       recoveryCodes: string[];
+    }>
+  >;
+
+  recover2FA: (
+    user: IUserRequestData["recover2FA"]["user"],
+    body: IUserRequestData["recover2FA"]["body"],
+  ) => Promise<
+    TServiceSuccess<{
+      userId: string;
+      accessToken: string;
     }>
   >;
 

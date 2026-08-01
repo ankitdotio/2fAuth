@@ -17,6 +17,7 @@ import {
 } from "../helpers/date-time.helper.js";
 import { generateRecoveryCodes, generateTOTP } from "../helpers/2fa.helper.js";
 import { createQRCodeDataUrl } from "../helpers/qr.helper.js";
+import { isValid } from "zod/v3";
 
 export default class UserService implements IUserService {
   constructor(private userRepository: IUserRepository) {}
@@ -185,6 +186,58 @@ export default class UserService implements IUserService {
   logout = (user: IUserRequestData["logout"]["user"]) => {
     return serviceSuccess("LOGOUT SUCCESSFULLY", {
       userId: String(user._id),
+    });
+  };
+
+  recover2FA = async (
+    user: IUserRequestData["recover2FA"]["user"],
+    payload: IUserRequestData["recover2FA"]["body"],
+  ) => {
+    const is2FAActivated = user.twoFactorAuth.activated;
+    if (!is2FAActivated) {
+      throw new ApplicationException(400, "RECOVERY FAILED");
+    }
+
+    const nonUsedRecoveryCodes = user.twoFactorAuth.recoveryCodes.filter(
+      (rc) => !rc.used,
+    );
+    let validCode = null;
+    for (const rc of nonUsedRecoveryCodes) {
+      const isValidRC = await compareValue(payload.recoveryCode, rc.code);
+
+      if (isValidRC) {
+        validCode = rc.code;
+        break;
+      }
+    }
+    if (!validCode) {
+      throw new ApplicationException(400, "RECOVERY FAILED");
+    }
+    //mark recovery code as used
+    const updatedRecoveyCodes = user.twoFactorAuth.recoveryCodes.map((rc) => {
+      if (rc.code === validCode) {
+        return {
+          code: rc.code,
+          used: true,
+        };
+      }
+    });
+
+    //token generation
+
+    const tokenPayload: TJwtPayload = {
+      userId: String(user._id),
+      stage: "2fa",
+    };
+
+    const accessToken = signJWT(
+      tokenPayload,
+      config.ACCESS_TOKEN_SECRET,
+      generateDaySeconds(1),
+    );
+    return serviceSuccess("LOGGED IN USING RECOVERY CODE", {
+      userId: String(user._id),
+      accessToken,
     });
   };
 }

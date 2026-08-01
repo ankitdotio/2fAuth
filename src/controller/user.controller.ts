@@ -9,6 +9,7 @@ import type {
 } from "../interfaces/user.interface.js";
 import {
   loginUserValidator,
+  recover2FAValidator,
   registerUserValidator,
   verify2FAValidator,
 } from "../validator/user.validator.js";
@@ -57,6 +58,35 @@ export default class UserController implements IUserController {
 
     const response = await this.UserService.activate2FA(user);
 
+    res.status(200).json(response);
+  };
+
+  recover2FA: RequestHandler = async (req, res, next) => {
+    const { user } = req as IauthenticatedRequest;
+    const body = req.body as IUserRequestData["recover2FA"]["body"];
+
+    const { success, data, error } = recover2FAValidator.safeParse(body);
+
+    if (!success) {
+      next(error);
+      return;
+    }
+
+    const response = await this.UserService.recover2FA(user, data);
+    const cookieOptions = getCookieOptions({
+      purpose: "auth",
+      type: "day",
+      value: 1,
+    });
+
+    //set cookie
+
+    res.cookie("accessToken", response.data.accessToken, cookieOptions);
+    res.status(200).json(response);
+  };
+  me: RequestHandler = (req, res, next) => {
+    const { user } = req as IauthenticatedRequest;
+    const response = this.UserService.me(user);
     res.status(200).json(response);
   };
 

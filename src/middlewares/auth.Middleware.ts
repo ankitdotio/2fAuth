@@ -34,7 +34,7 @@ const authMiddleware =
           {
             _id: jwtPayload.userId,
           },
-          "+twoFactorAuth.secret",
+          "+twoFactorAuth.secret +twoFactorAuth.recoveryCodes",
         );
         if (!user) {
           return next(new ApplicationException(401, "UNAUTHORIZED"));

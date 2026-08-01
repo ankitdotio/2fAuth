@@ -28,6 +28,14 @@ userRouter.route("/activate-2fa").post(
   userController.activate2FA,
 );
 
+userRouter.route("/recover-2fa").post(
+  authMiddleware({
+    stage: ["password"],
+    repositories: { userRepository },
+  }),
+  userController.recover2FA,
+);
+
 userRouter.route("/verify-2fa").post(
   authMiddleware({
     stage: ["password"],
